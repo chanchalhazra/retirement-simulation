@@ -84,16 +84,16 @@ def sidebar_inputs():
             total_expense = mortgage+property_tax+property_insurance+utility_expense+entertainment+food_expense+travel_expense
         else:
             essential_expense = st.number_input("Essential Expense including mortgage", min_value=0,
-                                                max_value=1200000, value=140000)
+                                                max_value=1200000, value=120000)
             non_essential_expense = st.number_input("Non Essential Expense like Travel", min_value=0,
-                                                    max_value=1200000, value=25000)
+                                                    max_value=1200000, value=20000)
             total_expense = essential_expense+non_essential_expense
         st.write(f"Total expense: {total_expense}")
         yrly_expenses = [total_expense * (1 + 0.01 * inflation) ** i for i in range(future_years)]
 
     with st.sidebar.expander("Savings and Investment"):
         starting_portfolio = st.number_input("Starting Portfolio", min_value=0, max_value=12000000,value=3000000)
-        portfolio_mix = st.slider("Equity percentage", min_value=0.0, max_value=1.0, value=0.8, step=0.1)
+        portfolio_mix = st.slider("Equity percentage", min_value=0.0, max_value=100.0, value=80.0, step=1.0)
 
     with st.sidebar.expander("Planning Scenarios"):
         sig_below_avg = st.slider("Significant Below Average - 90% cases perform better", min_value=0.0, max_value=100.0, value=10.0)

@@ -3,6 +3,7 @@ import numpy as np
 from utils.utilities import (read_fit_data, print_outcomes,
                              monte_carlo_simulation, portfolio_yearly_dataframe)
 from components.main_details import component_yrly_balances
+from utils.optimize_portfolio_mix import optimize_portfolio_mix
 
 def main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses, starting_portfolio, portfolio_mix,
             sig_below_avg, below_avg, average, above_avg, distribution_option,inflation, COLA_rate, sim_runs):
@@ -19,13 +20,16 @@ def main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses,
             mu_bond = st.number_input("Bond market return", 0.0,20.0,mu_fitted_bond)
             sigma_bond= st.number_input("Bond return variation(%)", 0.0, 20.0, sigma_fitted_bond)
         with col3:
-            portfolio_mix = st.number_input("Portfolio Equity(%)", min_value=0.0, max_value=1.0, value=portfolio_mix, step=0.1)
-            expense_reduction = st.number_input("Reduce expenses by(%)-not used yet", min_value=0.0, max_value=100.0, value=2.5, step=0.1)
-
+            portfolio_mix = 0.01*st.number_input("Adjust Portfolio Equity(%)", min_value=0.0, max_value=100.0, value=portfolio_mix, step=1.0)
+            expense_reduction = 0.01*st.number_input("Reduce expenses by(%)", min_value=0.0, max_value=100.0, value=0.0, step=1.0)
+            if expense_reduction > 0.0:
+                total_expense = yrly_expenses[0]*(1-expense_reduction)
+                yrly_expenses = [total_expense * (1 + 0.01 * inflation) ** i for i in range(future_years)]
         with col4:
             tax_rate = 0.01*st.slider("Effective Income Tax Rate %", min_value=0, max_value=50, value=10, step=1)
             cap_gain_tax_rate = st.slider("Capital Gain Tax Rate %(not used yet)", min_value=0, max_value=50, value=10, step=1)
-        st.write(f"Starting investment portfolio balance: {starting_portfolio} | Yearly expense {yrly_expenses[0]} ")
+        st.write(f"Starting portfolio balance: {f"{starting_portfolio:,.0f}"} | Starting yearly expense {f"{yrly_expenses[0]:,.0f}"} ")
+
     # Run simulations and calculate port folio
     sim_returns = monte_carlo_simulation(starting_portfolio, mu_equity, sigma_equity, mu_bond, sigma_bond, tax_rate, portfolio_mix,
                            return_df, yrly_expenses, total_incomes, total_ssn_earnings, distribution_type='normal',
@@ -46,6 +50,8 @@ def main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses,
             st.dataframe(df, use_container_width=False)
         with col2:
             st.dataframe(df_emp, use_container_width=False)
+
+
 
     # create the dataframe of cash flow and investment return
     st.markdown("---")

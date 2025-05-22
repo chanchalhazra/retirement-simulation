@@ -117,6 +117,8 @@ def print_outcomes(sim_returns,sim_returns_current, dist_type):
         "current $": [sig_below_avg_current[-1], below_avg_current[-1], average_current[-1], above_avg_current[-1]],
         "Future $": [sig_below_avg[-1], below_avg[-1], average[-1], above_avg[-1]]
     }
+    data["current $"] = [f"{val:,.0f}" for val in data["current $"]]
+    data["Future $"] = [f"{val:,.0f}" for val in data["Future $"]]
     indexes = ["Significantly Below Average", "Below Average", "Average", "Above Average"]
     df = pd.DataFrame(data, index=indexes)
     df.index.name = f"Using {dist_type} Distribution"
