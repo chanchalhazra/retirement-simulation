@@ -100,13 +100,13 @@ def sidebar_inputs():
         below_avg = st.slider("Below Average - 75% cases perform better", min_value=0.0, max_value=100.0, value=25.0)
         average = st.slider("Average - most likely 50% cases performs better", min_value=0.0, max_value=100.0, value=50.0)
         above_avg = st.slider("Above Average 25% cases perform better", min_value=0.0, max_value=100.0, value=75.0)
-
+    '''
 # --- File Upload and Buttons ---
     st.sidebar.subheader("📎 File and Action Inputs")
     uploaded_file = st.sidebar.file_uploader("Upload the inputs file")
     if uploaded_file:
         st.sidebar.write("Uploaded file:", uploaded_file.name)
-    '''
+    
     if st.sidebar.button("Run Simulation"):
         st.sidebar.write("You clicked the button!")
 
