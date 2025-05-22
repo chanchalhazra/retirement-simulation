@@ -5,7 +5,7 @@ from components.main_body import main_content
 
 
 
-np.random.seed(2345)
+#np.random.seed(2345)
 
 st. set_page_config(page_title="Investment Planning", page_icon="🧊",layout="wide",
                     initial_sidebar_state="expanded",
