@@ -11,14 +11,14 @@ def main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses,
     path = "./data/Stats_Table.csv"
     return_df, mu_fitted_equity, sigma_fitted_equity, mu_fitted_bond, sigma_fitted_bond = read_fit_data(path)
     np.random.seed(2345)
-    with st.expander("**Optionally tune these parameters  🛠️ observe the impact to your portfolio**", expanded=True):
+    with st.expander("**🛠 Optionally tune these parameters, that are derived using past 100 years of market data**", expanded=True):
         col1, col2, col3, col4 = st.columns(4)
         with col1:
             mu_equity = st.number_input("Equity market return", 0.0, 20.0, mu_fitted_equity)
-            sigma_equity = st.number_input("Equity return variation(%)", 0.0, 20.0, sigma_fitted_equity)
+            sigma_equity = st.number_input("Equity return std deviation)", 0.0, 20.0, sigma_fitted_equity)
         with col2:
             mu_bond = st.number_input("Bond market return", 0.0,20.0,mu_fitted_bond)
-            sigma_bond= st.number_input("Bond return variation(%)", 0.0, 20.0, sigma_fitted_bond)
+            sigma_bond= st.number_input("Bond return std deviation", 0.0, 20.0, sigma_fitted_bond)
         with col3:
             portfolio_mix = 0.01*st.number_input("Adjust Portfolio Equity(%)", min_value=0.0, max_value=100.0, value=portfolio_mix, step=1.0)
             expense_reduction = 0.01*st.number_input("Reduce expenses by(%)", min_value=0.0, max_value=100.0, value=0.0, step=1.0)
@@ -61,7 +61,7 @@ def main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses,
     with col2:
         currency = st.radio("In current or Future value", ("current", "future"))
     with col3:
-        distribution = st.radio("Probability Distribution", ("normal", "empirical"))
+        distribution = st.radio("Probability Distribution choice", ("normal", "empirical"))
     #create details dataframes
     if distribution == "normal":
         if currency == "future":

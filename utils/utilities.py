@@ -119,9 +119,9 @@ def print_outcomes(sim_returns,sim_returns_current, dist_type):
     }
     data["current $"] = [f"{val:,.0f}" for val in data["current $"]]
     data["Future $"] = [f"{val:,.0f}" for val in data["Future $"]]
-    indexes = ["Significantly Below Average", "Below Average", "Average", "Above Average"]
+    indexes = ["Significantly Below Average Market Return", "Below Average Market Return", "Average Market Return", "Best Case Market Return"]
     df = pd.DataFrame(data, index=indexes)
-    df.index.name = f"Using {dist_type} Distribution"
+    df.index.name = f"Model: {dist_type} Distribution"
     #df = df.round(0)
     return df,sig_below_avg, below_avg, average, above_avg, sig_below_avg_current, below_avg_current, average_current, above_avg_current
 
