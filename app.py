@@ -13,7 +13,7 @@ st. set_page_config(page_title="Investment Planning", page_icon="🧊",layout="w
                                 'Report a bug': "mailto:support@example.com",
                                 'About': "# This is a header. This is an *extremely* cool app!"})
 st.markdown("#### Retirement plan (Monte Carlo) simulation 📈")
-(future_years, total_ssn_earnings, total_incomes, yrly_expenses, starting_portfolio, portfolio_mix,
+(filing, future_years, total_ssn_earnings, total_incomes, total_401K_contributions, yrly_expenses, starting_portfolio, portfolio_mix,
  sig_below_avg, below_avg, average, above_avg, distribution_option, inflation, COLA_rate, sim_runs) = sidebar_inputs()
-main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses, starting_portfolio, portfolio_mix,
+main_content(filing, future_years, total_ssn_earnings, total_incomes,total_401K_contributions, yrly_expenses, starting_portfolio, portfolio_mix,
  sig_below_avg, below_avg, average, above_avg, distribution_option, inflation, COLA_rate, sim_runs)

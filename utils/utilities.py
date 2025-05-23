@@ -137,16 +137,17 @@ def plot_portfolio(portfolio, case, inCurrentDoller=True):
     st.pyplot(fig)
 
 #create detailed portfolio dataframe
-def portfolio_yearly_dataframe(future_years,total_ssn_earnings, total_incomes,tax_rate,
+def portfolio_yearly_dataframe(future_years,total_ssn_earnings, total_incomes,tax_rate,retirement_tax_rate,
                                yrly_expenses, starting_portfolio, ending_balances):
     current_year = datetime.now().year
     years = list(range(current_year, current_year + future_years))
     finance_df = pd.DataFrame(index=years)
     finance_df["SSN Earning"] = np.ceil(total_ssn_earnings)
     finance_df["Income"] = np.ceil(total_incomes)
+    #finance_df["Estimated Tax"] = np.ceil(total_incomes)
     finance_df["Earning after Tax"] = np.ceil((finance_df["SSN Earning"] + finance_df["Income"]) * (1 - tax_rate))
     finance_df['expense'] = np.ceil(yrly_expenses)
-    finance_df["Additional Withdrawal"] = (finance_df['expense'] - finance_df["Earning after Tax"])
+    finance_df["Additional Withdrawal"] = np.maximum(0.0,(finance_df['expense'] - finance_df["Earning after Tax"]))
     finance_df["ending balance"] = ending_balances
     finance_df["Start Balance"] = finance_df["ending balance"].shift(1).fillna(starting_portfolio)
     finance_df = finance_df[

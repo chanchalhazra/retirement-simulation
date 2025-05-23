@@ -2,15 +2,17 @@ import streamlit as st
 import numpy as np
 from utils.utilities import (read_fit_data, print_outcomes,
                              monte_carlo_simulation, portfolio_yearly_dataframe)
+from utils.estimate_tax import estimate_pre_retirement_tax_rate, estimate_retirement_tax_rate
 from components.main_details import component_yrly_balances
 from utils.optimize_portfolio_mix import optimize_portfolio_mix
 
-def main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses, starting_portfolio, portfolio_mix,
+def main_content(filing, future_years, total_ssn_earnings, total_incomes, total_401K_contributions, yrly_expenses, starting_portfolio, portfolio_mix,
             sig_below_avg, below_avg, average, above_avg, distribution_option,inflation, COLA_rate, sim_runs):
     # Read the data and fit the data to ding mu and sigma
     path = "./data/Stats_Table.csv"
     return_df, mu_fitted_equity, sigma_fitted_equity, mu_fitted_bond, sigma_fitted_bond = read_fit_data(path)
     np.random.seed(2345)
+    #if total_incomes
     with st.expander("**🛠 Optionally tune these parameters, that are derived using past 100 years of market data**", expanded=True):
         col1, col2, col3, col4 = st.columns(4)
         with col1:
@@ -26,8 +28,13 @@ def main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses,
                 total_expense = yrly_expenses[0]*(1-expense_reduction)
                 yrly_expenses = [total_expense * (1 + 0.01 * inflation) ** i for i in range(future_years)]
         with col4:
-            tax_rate = 0.01*st.slider("Effective Income Tax Rate %", min_value=0, max_value=50, value=10, step=1)
-            cap_gain_tax_rate = st.slider("Capital Gain Tax Rate %(not used yet)", min_value=0, max_value=50, value=10, step=1)
+            pre_retirement_tax_rate = estimate_pre_retirement_tax_rate(total_incomes[0],
+                                                                       retirement_contribution=total_401K_contributions[0],
+                                                                       filing=filing)
+            tax_rate = 0.01*st.slider("Est. Pre-Retirement Income Tax Rate %", min_value=0, max_value=50,
+                                      value=pre_retirement_tax_rate, step=1)
+            est_retirement_tax_rate = estimate_retirement_tax_rate(yrly_expenses[0],total_ssn_earnings[0],filing=filing)
+            retirement_tax_rate = st.slider("Est. In Retirement Tax Rate %", min_value=0, max_value=50, value=est_retirement_tax_rate, step=1)
         st.write(f"Starting portfolio balance: {f"{starting_portfolio:,.0f}"} | Starting yearly expense {f"{yrly_expenses[0]:,.0f}"} ")
 
     # Run simulations and calculate port folio
@@ -65,55 +72,55 @@ def main_content(future_years, total_ssn_earnings, total_incomes, yrly_expenses,
     #create details dataframes
     if distribution == "normal":
         if currency == "future":
-            sig_below_avg_df = portfolio_yearly_dataframe(future_years,total_ssn_earnings, total_incomes,tax_rate,
+            sig_below_avg_df = portfolio_yearly_dataframe(future_years,total_ssn_earnings, total_incomes,tax_rate,retirement_tax_rate,
                                yrly_expenses, starting_portfolio, ending_balances=sig_below_avg)
-            below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                          yrly_expenses, starting_portfolio,
-                                                          ending_balances=below_avg)
-            avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate, yrly_expenses,
+
+            below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                          yrly_expenses, starting_portfolio, ending_balances=below_avg)
+
+            avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate, yrly_expenses,
                                                 starting_portfolio, ending_balances=average)
-            above_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                          yrly_expenses, starting_portfolio,
-                                                          ending_balances=above_avg)
+
+            above_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                          yrly_expenses, starting_portfolio,ending_balances=above_avg)
         else:
-            sig_below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                          yrly_expenses, starting_portfolio,
-                                                          ending_balances=sig_below_avg_current)
-            below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                      yrly_expenses, starting_portfolio,
-                                                      ending_balances=below_avg_current)
-            avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                yrly_expenses,
-                                                starting_portfolio, ending_balances=average_current)
-            above_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
+            sig_below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                          yrly_expenses, starting_portfolio, ending_balances=sig_below_avg_current)
+
+            below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                      yrly_expenses, starting_portfolio, ending_balances=below_avg_current)
+
+            avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                yrly_expenses, starting_portfolio, ending_balances=average_current)
+
+            above_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
                                                       yrly_expenses, starting_portfolio,
                                                       ending_balances=above_avg_current)
     elif distribution == "empirical":
         if currency == "future":
-            sig_below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
+            sig_below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
                                                           yrly_expenses, starting_portfolio, ending_balances=sig_below_avg_emp)
-            below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                      yrly_expenses, starting_portfolio,
-                                                      ending_balances=below_avg_emp)
-            avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                yrly_expenses, starting_portfolio,
-                                                ending_balances=average_emp)
-            above_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                  yrly_expenses, starting_portfolio,
-                                                  ending_balances=above_avg_emp)
+
+            below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                      yrly_expenses, starting_portfolio, ending_balances=below_avg_emp)
+
+            avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                yrly_expenses, starting_portfolio,ending_balances=average_emp)
+
+            above_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                  yrly_expenses, starting_portfolio, ending_balances=above_avg_emp)
         else:
-            sig_below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                          yrly_expenses, starting_portfolio,
-                                                          ending_balances=sig_below_avg_emp_current)
-            below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                      yrly_expenses, starting_portfolio,
-                                                      ending_balances=below_avg_emp_current)
-            avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                yrly_expenses, starting_portfolio,
-                                                ending_balances=average_emp_current)
-            above_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,
-                                                      yrly_expenses, starting_portfolio,
-                                                      ending_balances=above_avg_emp_current)
+            sig_below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                          yrly_expenses, starting_portfolio,ending_balances=sig_below_avg_emp_current)
+
+            below_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                      yrly_expenses, starting_portfolio, ending_balances=below_avg_emp_current)
+
+            avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                yrly_expenses, starting_portfolio, ending_balances=average_emp_current)
+
+            above_avg_df = portfolio_yearly_dataframe(future_years, total_ssn_earnings, total_incomes, tax_rate,retirement_tax_rate,
+                                                      yrly_expenses, starting_portfolio,ending_balances=above_avg_emp_current)
 
     component_yrly_balances(sig_below_avg_df, below_avg_df, avg_df, above_avg_df)
 

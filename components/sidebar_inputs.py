@@ -11,18 +11,21 @@ def sidebar_inputs():
         COLA_rate = st.slider("SSN COLA Rate", 0.01, 3.0, value=1.5, step=0.01)
         sim_runs = st.number_input("No of simulations", min_value=1000, max_value=20000, value=1000)
     with_partner = st.sidebar.toggle("Plan includes Life Partner", value=True)
+
     with st.sidebar.expander("Personal Details"):
         if with_partner:
+            filing = "married"
             col1, col2 = st.columns(2)
             with col1:
                 person1_age = st.number_input("Your Age", min_value=0, max_value=120, value=57)
                 person1_expectancy = st.number_input("Plan-to age", min_value=0, max_value=120, value=90)
-                retire_at1 = st.number_input("Retire At", min_value=0, max_value=120, value=62)
+                retire_at1 = st.number_input("Retire At", min_value=0, max_value=120, value=59)
             with col2:
                 person2_age = st.number_input("Partner Age", min_value=0, max_value=120, value=51)
                 person2_expectancy = st.number_input("(P)Plan-to age", min_value=0, max_value=120, value=90)
-                retire_at2 = st.number_input("(P)Retire At", min_value=0, max_value=120, value=62)
+                retire_at2 = st.number_input("(P)Retire At", min_value=0, max_value=120, value=60)
         else:
+            filing = "single"
             col1, col2 = st.columns(2)
             person2_age = 0.0
             person2_expectancy = 0.0
@@ -30,18 +33,20 @@ def sidebar_inputs():
                 person1_age = st.number_input("Your Age", min_value=0, max_value=120, value=57)
                 person1_expectancy = st.number_input("Plan-to age", min_value=0, max_value=120,value=90)
             with col2:
-                retire_at1 = st.number_input("Retire At", min_value=0, max_value=120, value=62)
+                retire_at1 = st.number_input("Retire At", min_value=0, max_value=120, value=60)
         future_years = max((person1_expectancy - person1_age), (person2_expectancy - person2_age))
 
     with st.sidebar.expander("Income Details"):
         if with_partner:
             col1, col2 = st.columns(2)
             with col1:
-                person1_income = st.number_input("Your Income", min_value=0, max_value=1200000)
+                person1_income = st.number_input("Your Income", min_value=0, max_value=1200000, value=100000)
+                person1_401k_contribution = st.number_input("401K Deposits", min_value=0, max_value=35000, value=15000)
                 person1_ssn_income = st.number_input("SSN Income", min_value=0, max_value=60000, value=36000)
                 person1_ssn_start_at = st.number_input("SSN drawing at", min_value=62, max_value=150, value=65)
             with col2:
-                person2_income = st.number_input("Partner Income", min_value=0, max_value=1200000)
+                person2_income = st.number_input("Partner Income", min_value=0, max_value=1200000, value=100000)
+                person2_401k_contribution = st.number_input("Partner 401K", min_value=0, max_value=35000, value=15000)
                 person2_ssn_income = st.number_input("(P)SSN income", min_value=0, max_value=60000, value=28000)
                 person2_ssn_start_at = st.number_input("SSN drawing at", min_value=62, max_value=150, value=62)
             yrs_before_ssn1 = person1_ssn_start_at - person1_age
@@ -56,17 +61,24 @@ def sidebar_inputs():
             person1_incomes = [person1_income if i <= (retire_at1 - person1_age) else 0 for i in range(future_years)]
             person2_incomes = [person2_income if i <= (retire_at2 - person2_age) else 0 for i in range(future_years)]
             total_incomes = [a + b for a, b in zip(person1_incomes, person2_incomes)]
+            person1_401K = [person1_401k_contribution if i <= (retire_at1 - person1_age) else 0 for i in range(future_years)]
+            person2_401K = [person2_401k_contribution if i <= (retire_at2 - person2_age) else 0 for i in range(future_years)]
+            total_401K_contributions = [a + b for a, b in zip(person1_401K, person2_401K)]
         else:
             col1, col2 = st.columns(2)
             with col1:
-                person1_income = st.number_input("Your Income", min_value=0, max_value=120)
+                person1_income = st.number_input("Your Income", min_value=0, max_value=1200000, value=100000)
                 person1_ssn_income = st.number_input("SSN Income", min_value=0, max_value=60000,value=24000)
             with col2:
+                person1_401k_contribution = st.number_input("401K Deposits", min_value=0, max_value=35000,value=15000)
                 person1_ssn_start_at = st.number_input("SSN drawing at", min_value=62, max_value=150, value=65)
             yrs_before_ssn1 = person1_ssn_start_at - person1_age
             total_ssn_earnings = [round(person1_ssn_income * ((1 + 0.01 * COLA_rate) ** (i - yrs_before_ssn1)),2)
                                     if i >= yrs_before_ssn1 else 0 for i in range(future_years)]
             total_incomes = [person1_income if i <= (retire_at1 - person1_age) else 0 for i in range(future_years)]
+            total_401K_contributions= [person1_401k_contribution if i <= (retire_at1 - person1_age) else 0 for i in
+                            range(future_years)]
+
     with st.sidebar.expander("Expenses"):
         detailed_expense = st.toggle("Detail your Expense")
         if detailed_expense:
@@ -118,5 +130,5 @@ def sidebar_inputs():
         st.session_state.clicks += 1
     '''
     #st.sidebar.write("🔢 Counter value:", st.session_state.clicks)
-    return (future_years, total_ssn_earnings,total_incomes, yrly_expenses, starting_portfolio, portfolio_mix,
+    return (filing, future_years, total_ssn_earnings,total_incomes,total_401K_contributions, yrly_expenses, starting_portfolio, portfolio_mix,
             sig_below_avg, below_avg, average, above_avg, distribution_option, inflation, COLA_rate, sim_runs)
