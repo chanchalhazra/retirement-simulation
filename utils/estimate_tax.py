@@ -6,7 +6,7 @@ def estimate_retirement_tax(income, expense, ssn_earning, retirement_contributio
     single_tax_rates, married_tax_rates = rate_table()
     std_deduction_married = 30000
     std_deduction_single = 15000
-    add_withdrawal = max(0, (expense- income+ssn_earning))
+    add_withdrawal = max(0, (expense- income - ssn_earning))
     if filing == 'single':
         taxable_income = income + 0.85*ssn_earning + add_withdrawal - retirement_contribution - std_deduction_single
         tax_rates = single_tax_rates
@@ -57,3 +57,5 @@ def estimate_retirement_tax_rate(income, ssn_earning, total_expense, ssn_earning
 amt = estimate_pre_retirement_tax_rate(1000, retirement_contribution=0, filing='married')
 print(amt)
 '''
+#amt = estimate_retirement_tax(100000, 180000, 33000, 15000, filing='married')
+#print(amt)
