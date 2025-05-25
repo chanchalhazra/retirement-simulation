@@ -95,13 +95,20 @@ def sidebar_inputs():
                 travel_expense = st.number_input("Travel", min_value=0, max_value=120000)
             total_expense = mortgage+property_tax+property_insurance+utility_expense+entertainment+food_expense+travel_expense
         else:
-            essential_expense = st.number_input("Essential Expense including mortgage", min_value=0,
+            essential_expense = st.number_input("Essential Expense excluding mortgage", min_value=0,
                                                 max_value=1200000, value=120000)
+            col1, col2 = st.columns(2)
+            with col1:
+                yrly_mortgage = st.number_input("Yearly Mortgage", min_value=0, max_value=300000, value=0)
+            with col2:
+                mortgage_years = st.number_input("Years left", min_value=0, max_value=30)
             non_essential_expense = st.number_input("Non Essential Expense like Travel", min_value=0,
                                                     max_value=1200000, value=20000)
             total_expense = essential_expense+non_essential_expense
-        st.write(f"Total expense: {total_expense}")
-        yrly_expenses = [total_expense * (1 + 0.01 * inflation) ** i for i in range(future_years)]
+        #st.write(f"Total expense: {total_expense}")
+        expenses_no_mortgage = [total_expense * (1 + 0.01 * inflation) ** i for i in range(future_years)]
+        mortgage_expenses = [yrly_mortgage if i < mortgage_years else 0 for i in range(future_years)]
+        yrly_expenses = [a + b for a, b in zip(expenses_no_mortgage, mortgage_expenses)]
 
     with st.sidebar.expander("Savings and Investment"):
         starting_portfolio = st.number_input("Starting Portfolio", min_value=0, max_value=12000000,value=3000000)
