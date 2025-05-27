@@ -26,8 +26,8 @@ def main_content(filing, future_years, total_ssn_earnings, total_incomes, total_
             portfolio_mix = 0.01*st.number_input("Adjust Portfolio Equity(%)", min_value=0.0, max_value=100.0, value=portfolio_mix, step=1.0)
             expense_reduction = 0.01*st.number_input("Reduce expenses by(%)", min_value=0.0, max_value=100.0, value=0.0,step=1.0)
             if expense_reduction > 0.0:
-                total_expense = yrly_expenses[0]*(1-expense_reduction)
-                yrly_expenses = [total_expense * (1 + 0.01 * inflation) ** i for i in range(future_years)]
+                yrly_expenses = [a*(1-expense_reduction) for a in yrly_expenses]
+
 
         st.write(f"Starting portfolio balance: {f"{starting_portfolio:,.0f}"}"
                  f" | Starting yearly expense {f"{yrly_expenses[0]:,.0f}"}  | {residing_state} Resident, estimated state tax rate {est_statetax_rate}")
