@@ -1,6 +1,7 @@
 import streamlit as st
 import numpy as np
 import pandas as pd
+from utils.estimate_tax import estimate_retirement_tax
 
 # Sidebar
 def sidebar_inputs():
@@ -114,6 +115,13 @@ def sidebar_inputs():
         starting_portfolio = st.number_input("Starting Portfolio", min_value=0, max_value=12000000,value=3000000)
         portfolio_mix = st.slider("Equity percentage", min_value=0.0, max_value=100.0, value=80.0, step=1.0)
 
+    with st.sidebar.expander("State Residence and State Tax"):
+        states = {'California': 3.0, 'Florida': 0.0, 'Texas': 0.0, 'Oregon': 2.0, 'Arizona': 2.0}
+        residing_state = st.selectbox("Residing State", states.keys())
+        est_statetax_rate = st.slider("Estimated State Tax %", 0.0, 15.0, value=states[residing_state], step=0.1)
+        estimated_yrly_taxes = [estimate_retirement_tax(total_incomes[i], yrly_expenses[i],
+                                                        total_ssn_earnings[i], total_401K_contributions[i],
+                                                        filing=filing, state_tax_rate=est_statetax_rate) for i in range(future_years)]
     with st.sidebar.expander("Planning Scenarios"):
         sig_below_avg = st.slider("Significant Below Average - 90% cases perform better", min_value=0.0, max_value=100.0, value=10.0)
         below_avg = st.slider("Below Average - 75% cases perform better", min_value=0.0, max_value=100.0, value=25.0)
@@ -137,5 +145,8 @@ def sidebar_inputs():
         st.session_state.clicks += 1
     '''
     #st.sidebar.write("🔢 Counter value:", st.session_state.clicks)
+
+
     return (filing, future_years, total_ssn_earnings,total_incomes,total_401K_contributions, yrly_expenses, starting_portfolio, portfolio_mix,
-            sig_below_avg, below_avg, average, above_avg, distribution_option, inflation, COLA_rate, sim_runs)
+            sig_below_avg, below_avg, average, above_avg, distribution_option, inflation,
+            COLA_rate, sim_runs, estimated_yrly_taxes, residing_state, est_statetax_rate)
