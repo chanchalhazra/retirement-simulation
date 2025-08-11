@@ -30,7 +30,7 @@ def main_content(filing, future_years, total_ssn_earnings, total_incomes, total_
 
 
         st.write(f"Starting portfolio balance: {f"{starting_portfolio:,.0f}"}"
-                 f" | Starting yearly expense {f"{yrly_expenses[0]:,.0f}"}  | {residing_state} Resident, estimated state tax rate {est_statetax_rate}")
+                 f" | Starting yearly expense {f"{yrly_expenses[0]:,.0f}"}  | {residing_state} tax rate estimated {est_statetax_rate}% | Std Deduction assumed for Fed Tax")
 
     # Run simulations and calculate port folio
     tax_rate = 0.1
